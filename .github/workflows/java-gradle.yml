@@ -1,0 +1,33 @@
+name: Java/Gradle CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK {{ variables.javaVersion }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: {{ variables.javaVersion }}
+        distribution: 'temurin'
+        cache: gradle
+    - name: Setup Gradle {{ variables.gradleVersion }}
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: {{ variables.gradleVersion }}
+    {{ if variables.runTests }}
+    - name: Run tests
+      run: ./gradlew test
+    {{ endif }}
+    - name: Build with Gradle
+      run: ./gradlew build
+    {{ if variables.publishArtifacts }}
+    - name: Publish artifacts
+      run: ./gradlew publish
+    {{ endif }}
